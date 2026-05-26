@@ -1,12 +1,12 @@
 {
-    "name": "mini_block_world",
-    "short_name": "mini_block_world",
-    "start_url": ".",
+    "name": "BlocksLand",
+    "short_name": "BlocksLand",
+    "start_url": "./",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
-    "orientation": "portrait-primary",
+    "background_color": "#95d8ff",
+    "theme_color": "#23865f",
+    "description": "A tiny block world that runs directly on GitHub Pages.",
+    "orientation": "any",
     "prefer_related_applications": false,
     "icons": [
         {

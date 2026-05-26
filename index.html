@@ -1,46 +1,238 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
-
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
-
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
-  -->
-  <base href="$FLUTTER_BASE_HREF">
-
-  <meta charset="UTF-8">
-  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
-
-  <!-- iOS meta tags & icons -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="BlocksLand, a tiny block world that runs directly on GitHub Pages.">
+  <meta name="theme-color" content="#23865f">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="mini_block_world">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="BlocksLand">
+  <title>BlocksLand</title>
+  <link rel="icon" type="image/png" href="./favicon.png">
+  <link rel="apple-touch-icon" href="./icons/Icon-192.png">
+  <link rel="manifest" href="./manifest.json">
+  <style>
+    :root {
+      color-scheme: dark;
+      --sky: #95d8ff;
+      --sun: #ffd56a;
+      --grass: #42a867;
+      --soil: #79543a;
+      --stone: #76828e;
+      --ink: #13221c;
+      --paper: #f8ffe8;
+      --shadow: rgba(10, 31, 22, 0.28);
+    }
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+    * {
+      box-sizing: border-box;
+    }
 
-  <title>mini_block_world</title>
-  <link rel="manifest" href="manifest.json">
+    body {
+      margin: 0;
+      min-height: 100vh;
+      overflow: hidden;
+      font-family: "Trebuchet MS", "Verdana", sans-serif;
+      color: var(--paper);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.36), rgba(255, 255, 255, 0) 34%),
+        linear-gradient(180deg, var(--sky) 0 62%, #5abf79 62% 100%);
+    }
+
+    .scene {
+      position: relative;
+      display: grid;
+      min-height: 100vh;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .sun {
+      position: fixed;
+      top: 7vh;
+      right: 10vw;
+      width: 108px;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #fff4ad, var(--sun) 62%, #f1a93e);
+      box-shadow: 0 0 44px rgba(255, 212, 94, 0.75);
+    }
+
+    .cloud {
+      position: fixed;
+      width: 210px;
+      height: 58px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.78);
+      box-shadow: 46px -18px 0 rgba(255, 255, 255, 0.68), 82px 8px 0 rgba(255, 255, 255, 0.58);
+      opacity: 0.9;
+      animation: drift 24s linear infinite;
+    }
+
+    .cloud.one {
+      top: 14vh;
+      left: -260px;
+    }
+
+    .cloud.two {
+      top: 26vh;
+      left: -360px;
+      scale: 0.72;
+      animation-duration: 32s;
+      animation-delay: -12s;
+    }
+
+    .panel {
+      position: relative;
+      z-index: 1;
+      width: min(920px, 100%);
+      padding: clamp(18px, 4vw, 34px);
+      border: 4px solid rgba(19, 34, 28, 0.52);
+      background: rgba(19, 34, 28, 0.64);
+      box-shadow: 0 26px 70px var(--shadow);
+      backdrop-filter: blur(4px);
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(2.4rem, 9vw, 6rem);
+      line-height: 0.9;
+      letter-spacing: 0;
+      text-transform: uppercase;
+      text-shadow: 0 5px 0 rgba(0, 0, 0, 0.24);
+    }
+
+    p {
+      max-width: 58ch;
+      margin: 0 0 22px;
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      line-height: 1.55;
+    }
+
+    .world {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      grid-template-rows: repeat(7, 1fr);
+      gap: 4px;
+      width: 100%;
+      margin-top: 22px;
+      padding: 4px;
+      border: 4px solid rgba(248, 255, 232, 0.24);
+      background: rgba(0, 0, 0, 0.18);
+      aspect-ratio: 12 / 7;
+    }
+
+    .block {
+      min-width: 0;
+      border: 2px solid rgba(19, 34, 28, 0.28);
+      image-rendering: pixelated;
+    }
+
+    .grass {
+      background:
+        linear-gradient(180deg, #6bd579 0 30%, var(--grass) 30% 100%);
+    }
+
+    .dirt {
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0 18%, transparent 18%),
+        var(--soil);
+    }
+
+    .stone {
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.16) 0 24%, transparent 24%),
+        var(--stone);
+    }
+
+    .water {
+      background:
+        linear-gradient(180deg, #8ee5ff, #2388c9);
+    }
+
+    .air {
+      border-color: transparent;
+      background: transparent;
+    }
+
+    .tree {
+      background: #724522;
+    }
+
+    .leaf {
+      background: #267b43;
+    }
+
+    .hud {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .chip {
+      padding: 8px 12px;
+      border: 2px solid rgba(248, 255, 232, 0.36);
+      background: rgba(248, 255, 232, 0.14);
+      font-weight: 700;
+    }
+
+    @keyframes drift {
+      from {
+        transform: translateX(0);
+      }
+
+      to {
+        transform: translateX(calc(100vw + 520px));
+      }
+    }
+
+    @media (max-width: 640px) {
+      body {
+        overflow: auto;
+      }
+
+      .scene {
+        align-items: start;
+        padding: 16px;
+      }
+
+      .sun {
+        width: 72px;
+      }
+
+      .panel {
+        margin-top: 14vh;
+      }
+    }
+  </style>
 </head>
 <body>
-  <!--
-    You can customize the "flutter_bootstrap.js" script.
-    This is useful to provide a custom configuration to the Flutter loader
-    or to give the user feedback during the initialization process.
-
-    For more details:
-    * https://docs.flutter.dev/platform-integration/web/initialization
-  -->
-  <script src="flutter_bootstrap.js" async></script>
+  <main class="scene" aria-label="BlocksLand game page">
+    <div class="sun" aria-hidden="true"></div>
+    <div class="cloud one" aria-hidden="true"></div>
+    <div class="cloud two" aria-hidden="true"></div>
+    <section class="panel">
+      <h1>BlocksLand</h1>
+      <p>Build, wander, and shape a pocket-sized voxel landscape made for quick sessions on any screen.</p>
+      <div class="world" aria-label="Pixel block landscape">
+        <div class="air"></div><div class="air"></div><div class="air"></div><div class="leaf block"></div><div class="leaf block"></div><div class="leaf block"></div><div class="air"></div><div class="air"></div><div class="air"></div><div class="air"></div><div class="air"></div><div class="air"></div>
+        <div class="air"></div><div class="air"></div><div class="leaf block"></div><div class="leaf block"></div><div class="leaf block"></div><div class="leaf block"></div><div class="leaf block"></div><div class="air"></div><div class="air"></div><div class="air"></div><div class="air"></div><div class="air"></div>
+        <div class="air"></div><div class="air"></div><div class="air"></div><div class="leaf block"></div><div class="tree block"></div><div class="leaf block"></div><div class="air"></div><div class="air"></div><div class="air"></div><div class="water block"></div><div class="water block"></div><div class="air"></div>
+        <div class="air"></div><div class="air"></div><div class="air"></div><div class="air"></div><div class="tree block"></div><div class="air"></div><div class="air"></div><div class="air"></div><div class="water block"></div><div class="water block"></div><div class="water block"></div><div class="air"></div>
+        <div class="grass block"></div><div class="grass block"></div><div class="grass block"></div><div class="grass block"></div><div class="grass block"></div><div class="grass block"></div><div class="grass block"></div><div class="grass block"></div><div class="grass block"></div><div class="grass block"></div><div class="grass block"></div><div class="grass block"></div>
+        <div class="dirt block"></div><div class="dirt block"></div><div class="stone block"></div><div class="dirt block"></div><div class="dirt block"></div><div class="stone block"></div><div class="dirt block"></div><div class="dirt block"></div><div class="dirt block"></div><div class="stone block"></div><div class="dirt block"></div><div class="dirt block"></div>
+        <div class="stone block"></div><div class="dirt block"></div><div class="stone block"></div><div class="stone block"></div><div class="dirt block"></div><div class="stone block"></div><div class="stone block"></div><div class="dirt block"></div><div class="stone block"></div><div class="stone block"></div><div class="dirt block"></div><div class="stone block"></div>
+      </div>
+      <div class="hud" aria-label="Block types">
+        <span class="chip">Grass</span>
+        <span class="chip">Dirt</span>
+        <span class="chip">Stone</span>
+        <span class="chip">Water</span>
+      </div>
+    </section>
+  </main>
 </body>
 </html>
